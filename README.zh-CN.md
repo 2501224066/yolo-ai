@@ -109,4 +109,5 @@ MIT
 ## 友情链接
 
 - [LINUX DO](https://linux.do/)
+- [V2EX](https://www.v2ex.com/)
 

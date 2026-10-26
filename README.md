@@ -116,4 +116,5 @@ MIT
 ## Links
 
 - [LINUX DO](https://linux.do/)
+- [V2EX](https://www.v2ex.com/)
 
