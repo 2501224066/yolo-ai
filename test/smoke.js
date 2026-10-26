@@ -8,7 +8,7 @@ const path = require('node:path');
 
 const registry = require('../lib/registry');
 const { buildCommand } = require('../lib/exec');
-const { resolveAgent, ownDirs } = require('../lib/detect');
+const { resolveAgent, ownDirs, defaultDirs, pathDirs } = require('../lib/detect');
 
 let passed = 0;
 function check(label, fn) {
@@ -73,6 +73,23 @@ check('an agent never resolves to yolo entry point itself', () => {
 });
 check('resolution does not filter out standard directories (~/.local/bin, npm prefix)', () => {
   assert.strictEqual(ownDirs().length, 0);
+});
+check('defaultDirs provides fallback locations across platforms', () => {
+  const dirs = defaultDirs();
+  assert.ok(Array.isArray(dirs) && dirs.length > 0, 'has fallback directories');
+  if (process.platform === 'darwin') {
+    assert.ok(dirs.some((d) => d.includes('.local/bin') || d.includes('/usr/local/bin')), 'includes common mac paths');
+  }
+});
+check('pathDirs includes fallback directories even if PATH is empty', () => {
+  const savedPath = process.env.PATH;
+  try {
+    process.env.PATH = '';
+    const dirs = pathDirs();
+    assert.ok(dirs.length > 0, 'pathDirs has fallback directories even when PATH is empty');
+  } finally {
+    process.env.PATH = savedPath;
+  }
 });
 
 console.log('\nflag placement');
