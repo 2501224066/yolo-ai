@@ -1,5 +1,7 @@
 # yolo-ai
 
+English | [中文](README.zh-CN.md)
+
 One `yolo` prefix for every AI agent CLI's "skip the permission prompts" flag.
 
 ```bash
@@ -50,23 +52,70 @@ $ yolo --dry-run claude -p "1+1"
 bash "C:\Program Files\nodejs\claude" --dangerously-skip-permissions -p 1+1
 ```
 
-## Registered agents
+## All commands
 
-| agent | flag |
-|---|---|
-| `claude` | `--dangerously-skip-permissions` |
-| `agy` | `--dangerously-skip-permissions` |
-| `codex` | `--dangerously-bypass-approvals-and-sandbox` |
-| `gemini` | `--yolo` (native) |
-| `aider` | `--yes-always` |
-| `opencode` | `--yolo` (native) |
+| yolo command | actually runs | verified |
+|---|---|---|
+| `yolo claude` | `claude --dangerously-skip-permissions` | yes |
+| `yolo agy` | `agy --dangerously-skip-permissions` | yes |
+| `yolo codex` | `codex --dangerously-bypass-approvals-and-sandbox` | yes |
+| `yolo gemini` | `gemini --yolo` | yes |
+| `yolo qwen` | `qwen --yolo` | yes |
+| `yolo crush` | `crush --yolo` | yes |
+| `yolo opencode` | `opencode --auto` | yes |
+| `yolo cn` | `cn --auto` | yes |
+| `yolo aider` | `aider --yes-always` | **no** — Python package, not checked |
+
+Check any of them without running it:
+
+```bash
+$ yolo --dry-run opencode
+bash "C:\Program Files\nodejs\opencode" --auto
+```
 
 Only agents that are actually on your PATH are usable; `yolo --list` shows which.
 
-**Entries are only added after confirming the flag against that tool's own
-`--help` output.** A guessed flag fails outright, which is worse than not being
-registered at all. If you have an agent installed whose flag isn't listed here,
-run `<agent> --help` and add it to `lib/registry.js`:
+### Not every "yolo" is a total bypass
+
+Four of these convert *ask* into *allow* but still honor explicit **deny** rules,
+so "yolo" is not literally true for them:
+
+- `opencode --auto`
+- `cn --auto`
+- `gemini --yolo` / `qwen --yolo` — and per Qwen's docs, `--yolo` does **not**
+  enable a sandbox, so shell commands run at process privilege level
+
+### Why flags are verified rather than guessed
+
+A guessed flag is worse than no entry, and there are two distinct ways it fails:
+
+- Some tools reject unknown flags outright — `codex` prints
+  `error: unexpected argument '--totally-bogus' found`.
+- Others **silently ignore** them — `opencode` accepts an unknown flag and runs
+  normally, so a wrong entry looks like it works while skipping nothing.
+
+`--version` usually short-circuits argument parsing, so it can never be used to
+prove a flag exists. Check `--help`, or a parsing subcommand.
+
+### Agents deliberately not listed
+
+| agent | why not |
+|---|---|
+| `amp` | No CLI flag. Permissive by default; restriction is via policy plugins. |
+| `copilot` | `--yolo` is real, but GitHub's enterprise policy can suppress it at startup, so it may silently do nothing on a managed device. |
+| `cursor` | Official CLI installs as `agent` via a curl/PowerShell installer. npm `cursor-agent` has no `bin` field and is not it. |
+| `goose` | Block's agent is a Go binary, not on npm. npm `goose-cli` is an unrelated database migration tool. The real agent has no flag anyway — it's `GOOSE_MODE=auto`, and autonomous is already the default. |
+| `grok` | npm `@vibe-kit/grok-cli` is a third-party wrapper; its `--help` lists no permission flag. |
+| `kimi` | No such npm package — npm `kimi-cli` is an unrelated front-end tool generator. |
+| `mcode` | No npm package found. MiniMax's `/permission full` is an in-TUI slash command, which can't be passed as an argument. |
+| `pi` | Needs a third-party plugin plus an in-session slash command; not expressible as a flag. |
+
+Two names that look like agents but are not, and are excluded automatically:
+`continue` on PATH is the **Bash builtin** for loop control, and `copilot` may
+resolve to VS Code's shim that just prints "not found".
+
+If you have an agent installed whose flag isn't listed, run `<agent> --help`
+and add it to `lib/registry.js`:
 
 ```js
 myagent: { flag: '--the-real-flag', probe: ['--version'] },
