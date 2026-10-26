@@ -109,18 +109,6 @@ Windows specifics handled in `lib/exec.js`:
 - extensionless npm sh shims are launched through `bash`
 - `.ps1` targets are launched through `powershell -File`
 
-## Migrating from a hand-written wrapper
-
-If you previously had an `agy()` shell function or an `agy-yolo.cmd`, this
-replaces it. Those can be deleted:
-
-- `~/.bashrc` — the `agy()` and `agy-yolo()` functions
-- `Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` and
-  `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` — `function agy`
-- `~/.local/bin/agy-yolo.cmd`
-
-This package does not touch those files for you.
-
 ## License
 
 MIT

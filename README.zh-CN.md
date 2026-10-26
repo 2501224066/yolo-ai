@@ -102,17 +102,6 @@ Windows 相关处理都在 `lib/exec.js`：
 - 无扩展名的 npm sh shim 经 `bash` 启动
 - `.ps1` 目标经 `powershell -File` 启动
 
-## 从手写包装函数迁移
-
-如果你之前有 `agy()` shell 函数或 `agy-yolo.cmd`，这个包取代它们。那些可以删掉：
-
-- `~/.bashrc` —— `agy()` 和 `agy-yolo()` 两个函数
-- `Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` 和
-  `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` —— `function agy`
-- `~/.local/bin/agy-yolo.cmd`
-
-本包不会替你动这些文件。
-
 ## 许可证
 
 MIT
