@@ -105,3 +105,8 @@ Windows 相关处理都在 `lib/exec.js`：
 ## 许可证
 
 MIT
+
+## 友情链接
+
+- [LINUX DO](https://linux.do/)
+
