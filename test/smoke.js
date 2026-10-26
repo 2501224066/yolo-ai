@@ -36,14 +36,26 @@ check('native entries use the real --yolo name', () => {
 });
 
 console.log('\ncommand routing');
-check('.cmd goes through cmd.exe (EINVAL workaround)', () => {
-  const { cmd } = buildCommand('C:\\x\\claude.cmd', []);
-  assert.ok(/cmd\.exe$/i.test(cmd), `got ${cmd}`);
+check('.cmd goes through cmd.exe on Windows (EINVAL workaround)', () => {
+  const origPlatform = process.platform;
+  Object.defineProperty(process, 'platform', { value: 'win32' });
+  try {
+    const { cmd } = buildCommand('C:\\x\\claude.cmd', []);
+    assert.ok(/cmd\.exe$/i.test(cmd), `got ${cmd}`);
+  } finally {
+    Object.defineProperty(process, 'platform', { value: origPlatform });
+  }
 });
-check('.ps1 goes through powershell', () => {
-  const { cmd, argv } = buildCommand('C:\\x\\claude.ps1', []);
-  assert.ok(/powershell/i.test(cmd), `got ${cmd}`);
-  assert.ok(argv.includes('-File'), 'passes -File');
+check('.ps1 goes through powershell on Windows', () => {
+  const origPlatform = process.platform;
+  Object.defineProperty(process, 'platform', { value: 'win32' });
+  try {
+    const { cmd, argv } = buildCommand('C:\\x\\claude.ps1', []);
+    assert.ok(/powershell/i.test(cmd), `got ${cmd}`);
+    assert.ok(argv.includes('-File'), 'passes -File');
+  } finally {
+    Object.defineProperty(process, 'platform', { value: origPlatform });
+  }
 });
 check('a .exe spawns directly', () => {
   const { cmd, argv } = buildCommand('C:\\x\\agy.exe', ['--version']);
@@ -51,19 +63,16 @@ check('a .exe spawns directly', () => {
   assert.deepStrictEqual(argv, ['--version']);
 });
 
-console.log('\nshim resolution');
-check('own directories are excluded from resolution', () => {
-  const skip = ownDirs();
-  assert.ok(skip.length > 0, 'has at least one excluded dir');
-  for (const d of skip) assert.strictEqual(d, path.resolve(d).toLowerCase());
-});
-check('an agent never resolves to a path inside our own shim dirs', () => {
+console.log('\nagent resolution');
+check('an agent never resolves to yolo entry point itself', () => {
   for (const name of Object.keys(registry)) {
     const exe = resolveAgent(name);
     if (!exe) continue;
-    const dir = path.resolve(path.dirname(exe)).toLowerCase();
-    assert.ok(!ownDirs().includes(dir), `${name} resolved into shim dir ${dir}`);
+    assert.notStrictEqual(path.resolve(exe).toLowerCase(), path.resolve(process.argv[1] || '').toLowerCase());
   }
+});
+check('resolution does not filter out standard directories (~/.local/bin, npm prefix)', () => {
+  assert.strictEqual(ownDirs().length, 0);
 });
 
 console.log('\nflag placement');

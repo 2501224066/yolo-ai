@@ -1,6 +1,6 @@
 {
   "name": "yolo-ai",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Run any AI agent CLI with its permission prompts skipped — one `yolo <agent>` prefix for claude, agy, codex, gemini and friends.",
   "keywords": [
     "ai",
